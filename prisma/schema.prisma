@@ -1,0 +1,70 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  code          String    @id @unique
+  name          String    @db.VarChar(100)
+  borrowing     Int 
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  borrows       Borrow[]
+
+  @@map("users")
+}
+
+model Book {
+  code          String    @id @unique
+  title         String    @db.VarChar(200)
+  author        String    @db.VarChar(200)
+  stock         Int
+  available     Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  borrows       Borrow[]
+
+  @@map("books")
+}
+
+model Borrow {
+  code          Int        @id @default(autoincrement())
+  userCode      String 
+  userId        User       @relation(fields: [userCode], references: [code])
+  bookCode      String
+  bookId        Book       @relation(fields: [bookCode], references: [code])
+  borrowDate    DateTime
+  returningDate DateTime?
+
+  @@map("borrows")
+}
+
+model Blacklist {
+  code          Int        @id @default(autoincrement())
+  userCode      String 
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@map("blacklist")
+}
+
+model Saveborrowid {
+  code          Int        @id @default(autoincrement())
+  userCode      String
+  bookCode      String
+  borrowId      Int
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@map("saveborrowids")
+}
